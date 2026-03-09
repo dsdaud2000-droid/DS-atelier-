@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS Atelier | Private Grooming Atelier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E8C1;
+            --black: #0a0a0a;
+            --charcoal: #1a1a1a;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--black);
+            color: #f5f5f5;
+            overflow-x: hidden;
+        }
+        
+        .font-serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+        
+        .text-gold {
+            color: var(--gold);
+        }
+        
+        .bg-gold {
+            background-color: var(--gold);
+        }
+        
+        .border-gold {
+            border-color: var(--gold);
+        }
+        
+        .hover-gold:hover {
+            color: var(--gold);
+            transition: color 0.3s ease;
+        }
+        
+        /* Custom Cursor */
+        .cursor-dot,
+        .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        
+        .cursor-dot {
+            width: 5px;
+            height: 5px;
+            background-color: var(--gold);
+        }
+        
+        .cursor-outline {
+            width: 30px;
+            height: 30px;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        
+        .cursor-outline.hover {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold);
+        }
+        
+        /* Grain Overlay */
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        /* Smooth Reveal Animation */
+        .reveal-text {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+        
+        .char {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        
+        /* Gold Gradient Text */
+        .gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #F4E8C1 50%, #D4AF37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Service Card Hover */
+        .service-card {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+        
+        .service-card:hover .service-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        /* Button Styles */
+        .btn-luxury {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-luxury::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-luxury:hover::before {
+            left: 100%;
+        }
+        
+        /* Marquee */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+        
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        /* Hide scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--black);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 4px;
+        }
+        
+        /* Loading Screen */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--black);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+        
+        .loader-hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loader-text {
+            font-size: 3rem;
+            letter-spacing: 0.5em;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-yellow-900 selection:text-white">
+
+    <!-- Loading Screen -->
+    <div id="loader">
+        <div class="text-center">
+            <h1 class="font-serif text-gold loader-text">DS ATELIER</h1>
+            <p class="text-xs tracking-[0.3em] text-gray-500 mt-4 uppercase">Private Grooming Atelier</p>
+        </div>
+    </div>
+
+    <!-- Grain Overlay -->
+    <div class="grain"></div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot hidden md:block"></div>
+    <div class="cursor-outline hidden md:block"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300" id="navbar">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md border-b border-white/5"></div>
+        <div class="container mx-auto px-6 py-6 relative">
+            <div class="flex justify-between items-center">
+                <a href="#" class="font-serif text-2xl md:text-3xl tracking-widest text-gold hover:opacity-80 transition-opacity">
+                    DS ATELIER
+                </a>
+                
+                <div class="hidden md:flex items-center space-x-12">
+                    <a href="#services" class="text-xs tracking-[0.2em] uppercase hover-gold transition-colors">Services</a>
+                    <a href="#experience" class="text-xs tracking-[0.2em] uppercase hover-gold transition-colors">Experience</a>
+                    <a href="#contact" class="text-xs tracking-[0.2em] uppercase hover-gold transition-colors">Contact</a>
+                </div>
+
+                <a href="https://wa.me/971522346299" target="_blank" class="btn-luxury border border-gold text-gold px-8 py-3 text-xs tracking-[0.2em] uppercase hover:bg-gold hover:text-black transition-all duration-300">
+                    Book Now
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <!-- Background Image with Parallax -->
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black z-10"></div>
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 scale-110" id="hero-bg"></div>
+        </div>
+
+        <div class="container mx-auto px-6 relative z-20 text-center">
+            <p class="text-gold text-xs tracking-[0.5em] uppercase mb-6 opacity-0 translate-y-10" id="hero-subtitle">
+                Dubai's Most Exclusive
+            </p>
+            
+            <h1 class="font-serif text-5xl md:text-7xl lg:text-9xl mb-8 leading-tight">
+                <span class="block overflow-hidden">
+                    <span class="block transform translate-y-full" id="hero-title-1">PRIVATE</span>
+                </span>
+                <span class="block overflow-hidden">
+                    <span class="block transform translate-y-full gold-gradient" id="hero-title-2">ATELIER</span>
+                </span>
+            </h1>
+
+            <p class="text-gray-400 text-sm md:text-base max-w-2xl mx-auto mb-12 leading-relaxed opacity-0" id="hero-desc">
+                Discreet, luxury grooming services delivered to your residence. 
+                Serving the elite of Dubai with unparalleled artistry and confidentiality.
+            </p>
+
+            <div class="flex flex-col md:flex-row gap-6 justify-center items-center opacity-0" id="hero-cta">
+                <a href="https://wa.me/971522346299" target="_blank" class="btn-luxury bg-gold text-black px-12 py-4 text-xs tracking-[0.3em] uppercase font-medium hover:shadow-[0_0_30px_rgba(212,175,55,0.3)] transition-all">
+                    Reserve Appointment
+                </a>
+                <a href="#services" class="text-xs tracking-[0.2em] uppercase border-b border-gold pb-1 hover-gold transition-colors">
+                    Explore Services
+                </a>
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
+            <span class="text-[10px] tracking-[0.3em] uppercase">Scroll</span>
+            <div class="w-px h-12 bg-gradient-to-b from-gold to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- Marquee Section -->
+    <div class="border-y border-white/10 py-6 bg-black/50 backdrop-blur-sm">
+        <div class="marquee-container">
+            <div class="marquee-content text-gold font-serif text-2xl md:text-4xl italic">
+                <span class="mx-8">Discretion Guaranteed</span>
+                <span class="mx-8 text-white/20">•</span>
+                <span class="mx-8">Dubai Wide Service</span>
+                <span class="mx-8 text-white/20">•</span>
+                <span class="mx-8">By Appointment Only</span>
+                <span class="mx-8 text-white/20">•</span>
+                <span class="mx-8">Private Residence Visits</span>
+                <span class="mx-8 text-white/20">•</span>
+                <span class="mx-8">Discretion Guaranteed</span>
+                <span class="mx-8 text-white/20">•</span>
+                <span class="mx-8">Dubai Wide Service</span>
+                <span class="mx-8 text-white/20">•</span>
+                <span class="mx-8">By Appointment Only</span>
+                <span class="mx-8 text-white/20">•</span>
+                <span class="mx-8">Private Residence Visits</span>
+                <span class="mx-8 text-white/20">•</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Introduction Section -->
+    <section class="py-32 relative" id="experience">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="space-y-8">
+                    <p class="text-gold text-xs tracking-[0.5em] uppercase">The Experience</p>
+                    <h2 class="font-serif text-4xl md:text-6xl leading-tight">
+                        Artistry in the <br>
+                        <span class="gold-gradient italic">Comfort of Home</span>
+                    </h2>
+                    <p class="text-gray-400 leading-relaxed text-lg font-light">
+                        DS Atelier redefines luxury grooming by bringing the sophistication of a high-end salon 
+                        directly to your private residence. We understand that time is your most valuable asset, 
+                        and privacy is paramount.
+                    </p>
+                    <p class="text-gray-400 leading-relaxed text-lg font-light">
+                        Serving exclusively Dubai's most discerning clientele — from Palm Jumeirah to Emirates Hills, 
+                        Downtown to Dubai Hills — we offer a bespoke grooming experience without the inconvenience 
+                        of travel or public exposure.
+                    </p>
+                    
+                    <div class="grid grid-cols-3 gap-8 pt-8 border-t border-white/10">
+                        <div>
+                            <p class="font-serif text-3xl text-gold mb-2">01</p>
+                            <p class="text-xs tracking-widest uppercase text-gray-500">Consultation</p>
+                        </div>
+                        <div>
+                            <p class="font-serif text-3xl text-gold mb-2">02</p>
+                            <p class="text-xs tracking-widest uppercase text-gray-500">Execution</p>
+                        </div>
+                        <div>
+                            <p class="font-serif text-3xl text-gold mb-2">03</p>
+                            <p class="text-xs tracking-widest uppercase text-gray-500">Perfection</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="absolute -inset-4 bg-gold/20 blur-3xl rounded-full"></div>
+                    <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2070&auto=format&fit=crop" 
+                         alt="Luxury Grooming" 
+                         class="relative z-10 w-full h-[600px] object-cover rounded-sm grayscale hover:grayscale-0 transition-all duration-700">
+                    <div class="absolute -bottom-6 -right-6 w-48 h-48 border border-gold/30 z-20"></div>
+                    <div class="absolute -top-6 -left-6 w-48 h-48 border border-gold/30 z-20"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-32 bg-[#0f0f0f]" id="services">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-20">
+                <p class="text-gold text-xs tracking-[0.5em] uppercase mb-4">Curated Services</p>
+                <h2 class="font-serif text-4xl md:text-6xl mb-6">Signature Offerings</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    Each service is executed with precision tools and premium products, 
+                    tailored specifically to your facial structure and lifestyle.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="service-card group border border-white/10 p-12 bg-black/40 backdrop-blur-sm relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="service-icon text-gold text-5xl mb-8 transition-transform duration-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                            </svg>
+                        </div>
+                        <h3 class="font-serif text-2xl mb-4 group-hover:text-gold transition-colors">Precision Haircut</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                            Bespoke cutting techniques tailored to your facial structure and hair texture. 
+                            Includes consultation, wash, and styling with premium products.
+                        </p>
+                        <div class="flex justify-between items-center pt-6 border-t border-white/10">
+                            <span class="text-gold font-serif text-xl">AED 450</span>
+                            <span class="text-xs tracking-widest uppercase text-gray-500">60 min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="service-card group border border-white/10 p-12 bg-black/40 backdrop-blur-sm relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="service-icon text-gold text-5xl mb-8 transition-transform duration-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </div>
+                        <h3 class="font-serif text-2xl mb-4 group-hover:text-gold transition-colors">Beard Trim & Shape</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                            Sculpting and defining your beard with straight razor precision. 
+                            Hot towel treatment and premium beard oils included for ultimate skin care.
+                        </p>
+                        <div class="flex justify-between items-center pt-6 border-t border-white/10">
+                            <span class="text-gold font-serif text-xl">AED 350</span>
+                            <span class="text-xs tracking-widest uppercase text-gray-500">45 min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="service-card group border border-white/10 p-12 bg-black/40 backdrop-blur-sm relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="service-icon text-gold text-5xl mb-8 transition-transform duration-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                        </div>
+                        <h3 class="font-serif text-2xl mb-4 group-hover:text-gold transition-colors">Beard Colour</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                            Natural-looking grey coverage or enhancement using ammonia-free, 
+                            conditioning color formulas. Restores youthful appearance while maintaining texture.
+                        </p>
+                        <div class="flex justify-between items-center pt-6 border-t border-white/10">
+                            <span class="text-gold font-serif text-xl">AED 400</span>
+                            <span class="text-xs tracking-widest uppercase text-gray-500">50 min</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <p class="text-gray-500 text-sm italic mb-6">All services include travel within Dubai & premium aftercare products</p>
+                <a href="https://wa.me/971522346299" target="_blank" class="btn-luxury inline-block border border-gold text-gold px-12 py-4 text-xs tracking-[0.3em] uppercase hover:bg-gold hover:text-black transition-all">
+                    Request Full Menu
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="py-32 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1974&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-4xl mx-auto text-center mb-20">
+                <h2 class="font-serif text-4xl md:text-5xl mb-8">The DS Atelier <span class="gold-gradient italic">Difference</span></h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center p-8 border border-white/5 hover:border-gold/30 transition-colors duration-300">
+                    <div class="w-16 h-16 mx-auto mb-6 border border-gold/30 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif text-xl mb-3">Absolute Discretion</h3>
+                    <p class="text-gray-500 text-sm">NDA available upon request. Your privacy is our highest priority.</p>
+                </div>
+
+                <div class="text-center p-8 border border-white/5 hover:border-gold/30 transition-colors duration-300">
+                    <div class="w-16 h-16 mx-auto mb-6 border border-gold/30 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif text-xl mb-3">Punctuality</h3>
+                    <p class="text-gray-500 text-sm">We arrive precisely at your scheduled time, every time.</p>
+                </div>
+
+                <div class="text-center p-8 border border-white/5 hover:border-gold/30 transition-colors duration-300">
+                    <div class="w-16 h-16 mx-auto mb-6 border border-gold/30 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif text-xl mb-3">Premium Products</h3>
+                    <p class="text-gray-500 text-sm">Only the finest tools and organic products touch your skin.</p>
+                </div>
+
+                <div class="text-center p-8 border border-white/5 hover:border-gold/30 transition-colors duration-300">
+                    <div class="w-16 h-16 mx-auto mb-6 border border-gold/30 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-serif text-xl mb-3">Concierge Service</h3>
+                    <p class="text-gray-500 text-sm">From booking to aftercare, experience white-glove treatment.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coverage Area -->
+    <section class="py-20 bg-[#0a0a0a] border-y border-white/5">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div>
+                    <h3 class="font-serif text-3xl mb-2">Dubai Coverage</h3>
+                    <p class="text-gray-500">Serving all premium residential areas</p>
+                </div>
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <span class="px-6 py-2 border border-white/10 text-sm tracking-widest uppercase">Palm Jumeirah</span>
+                    <span class="px-6 py-2 border border-white/10 text-sm tracking-widest uppercase">Emirates Hills</span>
+                    <span class="px-6 py-2 border border-white/10 text-sm tracking-widest uppercase">Downtown Dubai</span>
+                    <span class="px-6 py-2 border border-white/10 text-sm tracking-widest uppercase">Dubai Hills</span>
+                    <span class="px-6 py-2 border border-white/10 text-sm tracking-widest uppercase">Jumeirah</span>
+                    <span class="px-6 py-2 border border-gold/30 text-gold text-sm tracking-widest uppercase">+ All Areas</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-32 relative" id="contact">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto text-center">
+                <p class="text-gold text-xs tracking-[0.5em] uppercase mb-6">By Appointment Only</p>
+                <h2 class="font-serif text-5xl md:text-7xl mb-8">Begin Your <span class="gold-gradient italic">Experience</span></h2>
+                <p class="text-gray-400 text-lg mb-12 max-w-2xl mx-auto">
+                    Contact us exclusively via WhatsApp for bookings and inquiries. 
+                    We respond to all messages within the hour during business hours.
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-16">
+                    <div class="p-8 border border-white/10 bg-white/5 backdrop-blur-sm">
+                        <p class="text-xs tracking-[0.3em] uppercase text-gray-500 mb-4">WhatsApp</p>
+                        <a href="https://wa.me/971522346299" target="_blank" class="text-2xl md:text-3xl font-serif text-gold hover:text-white transition-colors">
+                            +971 52 234 6299
+                        </a>
+                        <p class="text-xs text-gray-600 mt-2">Preferred method of contact</p>
+                    </div>
+                    
+                    <div class="p-8 border border-white/10 bg-white/5 backdrop-blur-sm">
+                        <p class="text-xs tracking-[0.3em] uppercase text-gray-500 mb-4">Availability</p>
+                        <p class="text-xl font-serif text-white">Daily</p>
+                        <p class="text-sm text-gray-400 mt-2">10:00 AM — 10:00 PM</p>
+                    </div>
+                </div>
+
+                <a href="https://wa.me/971522346299" target="_blank" class="btn-luxury inline-flex items-center gap-4 bg-gold text-black px-16 py-6 text-sm tracking-[0.3em] uppercase font-medium hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] transition-all group">
+                    <span>Book via WhatsApp</span>
+                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+
+                <p class="text-xs text-gray-600 mt-8 italic">
+                    * 24-hour advance booking required. Cancellation policy applies.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-12 bg-black">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="text-center md:text-left">
+                    <h4 class="font-serif text-2xl text-gold mb-2">DS ATELIER</h4>
+                    <p class="text-xs tracking-[0.2em] text-gray-600 uppercase">Private Grooming Atelier</p>
+                </div>
+                
+                <div class="text-center md:text-right">
+                    <p class="text-xs text-gray-600 mb-2">© 2024 DS Atelier. All rights reserved.</p>
+                    <p class="text-[10px] text-gray-700 uppercase tracking-widest">Dubai, United Arab Emirates</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Loading Screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('loader-hidden');
+                initAnimations();
+            }, 1500);
+        });
+
+        // Custom Cursor
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+        
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+            
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        // Hover effect for cursor
+        const interactiveElements = document.querySelectorAll('a, button, .service-card');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursorOutline.classList.add('hover'));
+            el.addEventListener('mouseleave', () => cursorOutline.classList.remove('hover'));
+        });
+
+        // GSAP Animations
+        function initAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero Animations
+            gsap.to("#hero-subtitle", {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                delay: 0.2,
+                ease: "power3.out"
+            });
+
+            gsap.to("#hero-title-1", {
+                y: 0,
+                duration: 1.2,
+                delay: 0.4,
+                ease: "power3.out"
+            });
+
+            gsap.to("#hero-title-2", {
+                y: 0,
+                duration: 1.2,
+                delay: 0.6,
+                ease: "power3.out"
+            });
+
+            gsap.to("#hero-desc", {
+                opacity: 1,
+                duration: 1,
+                delay: 0.8,
+                ease: "power3.out"
+            });
+
+            gsap.to("#hero-cta", {
+                opacity: 1,
+                duration: 1,
+                delay: 1,
+                ease: "power3.out"
+            });
+
+            // Parallax Hero Background
+            gsap.to("#hero-bg", {
+                scrollTrigger: {
+                    trigger: "body",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: true
+                },
+                y: 200,
+                scale: 1.2
+            });
+
+            // Service Cards Stagger
+            gsap.from(".service-card", {
+                scrollTrigger: {
+                    trigger: "#services",
+                    start: "top 80%",
+                },
+                y: 100,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: "power3.out"
+            });
+
+            // Navbar scroll effect
+            let lastScroll = 0;
+            window.addEventListener('scroll', () => {
+                const currentScroll = window.pageYOffset;
+                const navbar = document.getElementById('navbar');
+                
+                if (currentScroll > 100) {
+                    navbar.classList.add('py-4');
+                    navbar.classList.remove('py-6');
+                } else {
+                    navbar.classList.add('py-6');
+                    navbar.classList.remove('py-4');
+                }
+                
+                lastScroll = currentScroll;
+            });
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
